@@ -1,43 +1,123 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-from .models import Client, Product, Order
-from datetime import timedelta
-from datetime import datetime as dt, timedelta
+from datetime import datetime, timedelta
+from app_hw2.models import Client, Order, OrderItem, Product
+from .forms import ProductEdit, ChoiceProduct
 
- # Create your views here.
-def clients_view(request):
+
+def clients(request):
     clients = Client.objects.all()
     context = {
-        'clients': clients
+        'clients': clients,
+        'title': 'All clients'
     }
-    return render(request, 'app_hw2/clients.html', context=context)
+    return render(request, "app_hw2/clients.html", context)
 
 
-def products_view(request):
-    products = Product.objects.all()
-    res_str = '<br>'.join([str(product) for product in products])
-    return HttpResponse(res_str)
-
-def orders_view(request):
-    orders = Order.objects.all()
-    res_str = '<br>'.join([str(order) for order in orders])
-    return HttpResponse(res_str)
-
-def client_orders_view(request, client_id: int,filter_days: int):
-    products = []
-    user = Client.objects.filter(pk=client_id).first()
-    
-    date_low_lim = (dt.now() - timedelta(filter_days))
-    orders = Order.objects.filter(client=user).filter(order_date__gt=date_low_lim).order_by('order_date')
-    context ={
-        'user': user, 
-        'orders': orders, 
-        'products': products
-    }
+def client(request, client_id: int):
+    client = Client.objects.get(pk=client_id)
+    orders = Order.objects.filter(client=client)
+    order_items = {}
     for order in orders:
-        products.append(order.products.name)
-        print(order.date_created)
-        print(products)
-        print(order.products.name)
+        items = OrderItem.objects.filter(order=order)
+        order_items[order.pk] = []
+        for item in items:
+            order_items[order.pk].append(item)
+    context = {
+        'client': client,
+        'orders': orders,
+        'order_items': order_items,
+        'title': f'Orders by {client.str_to_title()}'
+    }
+    return render(request, "app_hw2/client.html", context)
 
-    return render(request, 'app_hw2/client_orders.html', context=context)
+
+def client_7days(request, client_id: int):
+    client = Client.objects.get(pk=client_id)
+    current_date = datetime.now()
+    start_date = current_date - timedelta(days=7)
+    orders = Order.objects.filter(
+        client=client, date_created__gte=start_date
+        ).order_by('-date_created')
+    order_items = {}
+    for order in orders:
+        items = OrderItem.objects.filter(order=order)
+        order_items[order.pk] = []
+        for item in items:
+            order_items[order.pk].append(item)
+    context = {
+        'client': client,
+        'orders': orders,
+        'order_items': order_items,
+        'title': f'Orders by {client.str_to_title()} for last 7 days'
+    }
+    return render(request, "app_hw2/client_orders.html", context)
+
+
+def client_30days(request, client_id: int):
+    client = Client.objects.get(pk=client_id)
+    current_date = datetime.now()
+    start_date = current_date - timedelta(days=30)
+    orders = Order.objects.filter(
+        client=client, date_created__gte=start_date
+        ).order_by('-date_created')
+    order_items = {}
+    for order in orders:
+        items = OrderItem.objects.filter(order=order)
+        order_items[order.pk] = []
+        for item in items:
+            order_items[order.pk].append(item)
+    context = {
+        'client': client,
+        'orders': orders,
+        'order_items': order_items,
+        'title': f'Orders by {client.str_to_title()} for last 30 days'
+    }
+    return render(request, "app_hw2/client_orders.html", context)
+
+
+
+def client_365days(request, client_id: int):
+    client = Client.objects.get(pk=client_id)
+    current_date = datetime.now()
+    start_date = current_date - timedelta(days=365)
+    orders = Order.objects.filter(
+        client=client, date_created__gte=start_date
+        ).order_by('-date_created')
+    order_items = {}
+    for order in orders:
+        items = OrderItem.objects.filter(order=order)
+        order_items[order.pk] = []
+        for item in items:
+            order_items[order.pk].append(item)
+    context = {
+        'client': client,
+        'orders': orders,
+        'order_items': order_items,
+        'title': f'Orders by {client.str_to_title()} for last 365 days'
+    }
+    return render(request, "app_hw2/client_orders.html", context)
+
+
+def choice_prod(request):
+    products = Product.objects.all()
+    context = {
+        'products': products,
+        'title': 'All products'
+    }
+    return render(request, "app_hw2/choice_prod.html", context)
+
+def prod_edit(request, product_id: int):
+    product = Product.objects.get(pk=product_id)
+    if request.method == 'POST':
+        form = ProductEdit(request.POST, request.FILES,instance=product)
+        if form.is_valid():
+            form.save()
+            return choice_prod(request)
+    else:
+        form = ProductEdit(instance=product)
+    context = {
+        'form': form,
+        'product': product,
+        'title': 'Edit product'
+    }
+    return render(request, 'app_hw2/prod_edit.html', context)

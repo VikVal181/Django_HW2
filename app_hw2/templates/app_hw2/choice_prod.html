@@ -2,13 +2,16 @@
 
 {% block title %} {{title}} {% endblock %}
 
+
 {% block content %}
-<h1>{{ title }}</h1>
+<h3>Select the product</h3>
+
 <ol>
-    {% for client in clients %}
+    {% for product in products %}
     <li>
-        <a href="{% url 'client' client.id %}"> {{ client }} </a>
+        <a href="{% url 'prod_edit' product.id %}"> {{ product }} </a>
     </li>
     {% endfor %}
 </ol>
+
 {% endblock %}

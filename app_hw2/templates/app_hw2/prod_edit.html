@@ -1,0 +1,20 @@
+{% extends 'app_hw2/base.html' %}
+
+{% block title %} {{title}} {% endblock %}
+
+
+{% block content %}
+<h3>Edit product</h3>
+<form action="" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Save">
+</form>
+<p>Current photo:
+    {% if product.photo %}
+    <img src="{{ product.photo.url }}" alt="{{ product.name }}">
+    {% else %}
+    None
+    {% endif %}
+</p>
+{% endblock %}
