@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from datetime import datetime, timedelta
 from app_hw2.models import Client, Order, OrderItem, Product
 from .forms import ProductEdit, ChoiceProduct
@@ -98,26 +98,66 @@ def client_365days(request, client_id: int):
     return render(request, "app_hw2/client_orders.html", context)
 
 
-def choice_prod(request):
-    products = Product.objects.all()
-    context = {
-        'products': products,
-        'title': 'All products'
-    }
-    return render(request, "app_hw2/choice_prod.html", context)
+# def choice_prod(request):
+#     products = Product.objects.all()
+#     context = {
+#         'products': products,
+#         'title': 'All products'
+#     }
+#     return render(request, "app_hw2/choice_prod.html", context)
 
-def prod_edit(request, product_id: int):
-    product = Product.objects.get(pk=product_id)
-    if request.method == 'POST':
-        form = ProductEdit(request.POST, request.FILES,instance=product)
-        if form.is_valid():
-            form.save()
-            return choice_prod(request)
+def prod_edit(request):
+    selected_product = None
+    if request.method == "POST":
+        form_select = ChoiceProduct(request.POST)
+        form_edit = ProductEdit(instance=selected_product)
+        print(0)
+        if form_select.is_valid():
+            print(1)
+            selected_product = form_select.cleaned_data["product"]
+            form_edit = ProductEdit(
+                request.POST, request.FILES, instance=selected_product
+            )
+            if form_edit.is_valid():
+                print(2)
+                form_edit.save(commit=True)
+                selected_product = None
+            else:
+                form_edit = ProductEdit(instance=selected_product)
     else:
-        form = ProductEdit(instance=product)
+        form_select = ChoiceProduct()
+        form_edit = ProductEdit(instance=selected_product)
+
     context = {
-        'form': form,
-        'product': product,
-        'title': 'Edit product'
+        "form_select": form_select,
+        "form_edit": form_edit,
+        "selected_product": selected_product,
+        "title": "Edit product",
     }
-    return render(request, 'app_hw2/prod_edit.html', context)
+    return render(request, "app_hw2/prod_edit.html", context)
+
+def order_create(request):
+    if request.method == 'POST':
+        client_id = request.POST.get('client')
+        products = request.POST.getlist('products')
+        quantities = request.POST.getlist('quantities')
+
+        # Создаем новый заказ
+        order = Order.objects.create(client_id=client_id)
+
+        # Добавляем товары в заказ
+        for product, quantity in zip(products, quantities):
+            product = Product.objects.get(id=product)
+            quantity = int(quantity)
+            OrderItem.objects.create(order=order, product=product, quantity=quantity, price=product.price*quantity)
+
+        # Обновляем общую стоимость заказа
+        order.total_price = sum([item.price for item in order.orderitem_set.all()])
+        order.save()
+        return redirect('/admin/app_hw2/order')
+
+
+    clients = Client.objects.all()
+    products = Product.objects.all()
+    context = {'clients': clients, 'products': products}
+    return render(request, 'app_hw2/order_create.html', context)

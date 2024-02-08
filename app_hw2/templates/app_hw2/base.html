@@ -1,23 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %} Base {% endblock %}</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <header>
-        <nav>
-            <a href="{% url 'clients' %}">Clients</a>
-            <a href="{% url 'choice_prod' %}">Edit product</a>
-        </nav>
+      <nav>
+        <a href="{% url 'clients' %}">Clients</a>
+        <a href="{% url 'prod_edit' %}">Edit product</a>
+        <a href="{% url 'order_create' %}">Create new order</a>
+      </nav>
     </header>
-    {% block content %}
-    Content
-    {% endblock %}
-</body>
-
+    {% block content %} Content {% endblock %}
+  </body>
 </html>

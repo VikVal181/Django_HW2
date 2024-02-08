@@ -7,14 +7,22 @@
 <h3>Edit product</h3>
 <form action="" method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ form_select.as_p }}
+
+    {% if selected_product %}
+    {% csrf_token %}
+    {{ form_edit.as_p }}
+    <p>Current photo:
+        {% if selected_product.photo %}
+        <img src="{{ selected_product.photo.url }}" alt="{{ selected_product.name }}">
+        {% else %}
+        None
+        {% endif %}
+    </p>
     <input type="submit" value="Save">
-</form>
-<p>Current photo:
-    {% if product.photo %}
-    <img src="{{ product.photo.url }}" alt="{{ product.name }}">
     {% else %}
-    None
+    <input type="submit" value="Select">
+    <p>Select product</p>
     {% endif %}
-</p>
+</form>
 {% endblock %}

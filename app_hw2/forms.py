@@ -6,9 +6,7 @@ from django import forms
 class ProductEdit(forms.ModelForm):
     class Meta:
         model = Product
-        fields = [
-            'name', 'description', 'price', 'count', 'photo'
-            ]
+        fields = ["name", "description", "price", "quantity", "photo"]
         exclude = ['added_date']
     added_date = forms.DateField(
         initial=datetime.date.today,

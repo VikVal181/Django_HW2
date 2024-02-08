@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Create Order</title>
+</head>
+
+<body>
+  <h1>Create Order</h1>
+  <form method="post">
+    {% csrf_token %}
+    <label for="client">Клиент:</label>
+    <select name="client" id="client">
+      {% for client in clients %}
+      <option value="{{ client.id }}">{{ client.name }}</option>
+      {% endfor %}</select><br />
+    <div style="display:flex; gap:30px">
+      <div>
+        <label for="products">Products:</label><br />
+        {% for product in products %}
+        <input type="checkbox" name="products" value="{{ product.id }}" /> {{ product.name }}<br />
+        {% endfor %}
+      </div>
+      <div>
+        <label for="quantities">Quantity:</label><br />
+        {% for product in products %}
+        <input type="number" name="quantities" value="1" /><br />
+        {% endfor %}
+      </div>
+    </div>
+    <input type="submit" value="Create Order" />
+  </form>
+</body>
+
+</html>
